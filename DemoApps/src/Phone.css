@@ -1,0 +1,44 @@
+.iphone {
+  position: relative;
+  width: 320px;
+  height: 680px;
+  border: 8px solid transparent;
+  border-radius: 40px;        /* ← légèrement arrondi */
+  background: linear-gradient(145deg, #222, #555);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  margin: 20px auto;
+  overflow: hidden;
+}
+
+.iphone-notch {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 22px;
+  background: #1a1a1a;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  z-index: 10;
+}
+
+.iphone-screen {
+  width: 100%;
+  height: 100%;
+  border-radius: 32px;
+  overflow: hidden;
+}
+
+.iphone-button {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 5px;
+  background: #333;
+  border-radius: 3px;
+}
+
+
