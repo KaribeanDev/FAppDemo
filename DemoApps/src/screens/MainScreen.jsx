@@ -22,14 +22,14 @@ export default function MainScreen({ onNavigate }) {
       <div
         className="hotspot"
         style={{ top: "4%", left: "40%", width: "20%", height: "5%" }}
-        onClick={() => onNavigate("accounts")}
+        onClick={() => alert("Mes produits")}
       ></div>
 
       {/* Icône messages (haut droite) */}
       <div
         className="hotspot"
         style={{ top: "4%", right: "5%", width: "10%", height: "5%" }}
-        onClick={() => onNavigate("messages")}
+        onClick={() => alert("chat")}
       ></div>
 
       {/* --- Carte compte --- */}
@@ -37,22 +37,22 @@ export default function MainScreen({ onNavigate }) {
       {/* Envoyer de l'argent */}
       <div
         className="hotspot"
-        style={{ top: "43%", left: "10%", width: "25%", height: "10%" }}
+        style={{ top: "33%", left: "10%", width: "25%", height: "10%" }}
         onClick={() => alert("Envoyer de l'argent")}
       ></div>
 
       {/* Copier IBAN */}
       <div
         className="hotspot"
-        style={{ top: "43%", left: "40%", width: "25%", height: "10%" }}
+        style={{ top: "33%", left: "40%", width: "25%", height: "10%" }}
         onClick={() => alert("IBAN copié !")}
       ></div>
 
       {/* Gérer mon compte */}
       <div
         className="hotspot"
-        style={{ top: "43%", left: "70%", width: "25%", height: "10%" }}
-        onClick={() => onNavigate("settings")}
+        style={{ top: "33%", left: "70%", width: "25%", height: "10%" }}
+        onClick={() => alert("Mon compte")}
       ></div>
 
       {/* --- Liste des transactions --- */}
@@ -60,16 +60,10 @@ export default function MainScreen({ onNavigate }) {
       {/* Zone cliquable sur la liste */}
       <div
         className="hotspot"
-        style={{ top: "65%", left: "10%", width: "80%", height: "20%" }}
-        onClick={() => onNavigate("transactions")}
+        style={{ top: "55%", left: "5%", width: "90%", height: "30%" }}
+        onClick={() => alert("transactions")}
       ></div>
 
-      {/* "Tout afficher" */}
-      <div
-        className="hotspot"
-        style={{ top: "87%", left: "35%", width: "30%", height: "5%" }}
-        onClick={() => onNavigate("transactions")}
-      ></div>
 
       {/* --- Barre de navigation du bas --- */}
 
@@ -91,7 +85,7 @@ export default function MainScreen({ onNavigate }) {
       <div
         className="hotspot"
         style={{ top: "92%", left: "50%", width: "25%", height: "8%" }}
-        onClick={() => onNavigate("transfer")}
+        onClick={() => onNavigate("virements")}
       ></div>
 
       {/* Découvrir */}
