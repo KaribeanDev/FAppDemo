@@ -48,7 +48,7 @@ export default function ProfileScreen({ onNavigate }) {
       <div
         className="hotspot"
         style={{ top: "91%", left: "35%", width: "30%", height: "4%" }}
-        onClick={() => alert("Déconnexion effectuée")}
+        onClick={() => onNavigate("defaut")}
       ></div>
     </div>
   );

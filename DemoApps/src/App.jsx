@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Phone from "./components/Phone";
 import MainScreen from "./screens/MainScreen";
@@ -5,30 +6,40 @@ import EpargneScreen from "./screens/EpargneScreen";
 import ProfilScreen from "./screens/ProfilScreen";
 import VirementsScreen from "./screens/VirementsScreen";
 import BeneficiairesScreen from "./screens/BeneficiairesScreen";
+import PageDefautScreen from "./screens/PageDefautScreen";
+import SignScreen from "./screens/SignScreen";
+import StartLogScreen from "./screens/StartLogScreen";
+import LoginTransScreen from "./screens/LoginTranScreen";
+import RecoveryaccountScreen from "./screens/RecoveryaccountScreen";
+import logVerifCodeScreen from "./screens/LogVerifCodeScreen";
+import LogInTransAccountSetupCoverScreen from "./screens/LogInTransAccountSetupCoverScreen";
 import "./styles.css";
 
 export default function App() {
   const [current, setCurrent] = useState("main");
 
-  const renderScreen = () => {
-    switch (current) {
-      case "epargne":
-        return <EpargneScreen onNavigate={setCurrent} />;
-              case "profil":
-        return <ProfilScreen onNavigate={setCurrent} />;
-              case "virements":
-        return <VirementsScreen onNavigate={setCurrent} />;
-              case "beneficiaires":
-        return <BeneficiairesScreen onNavigate={setCurrent} />;
-
-      default:
-        return <MainScreen onNavigate={setCurrent} />;
-    }
+  const screens = {
+    main: MainScreen,
+    epargne: EpargneScreen,
+    profil: ProfilScreen,
+    virements: VirementsScreen,
+    beneficiaires: BeneficiairesScreen,
+    defaut: PageDefautScreen,
+    sign: SignScreen,
+    startLog: StartLogScreen,
+    logTrans: LoginTransScreen,
+    recovery: RecoveryaccountScreen,
+    logVerifCode: logVerifCodeScreen,
+    logSetupCover: LogInTransAccountSetupCoverScreen,
   };
+
+  const ScreenComponent = screens[current] || MainScreen;
 
   return (
     <div className="app-container">
-      <Phone>{renderScreen()}</Phone>
+      <Phone>
+        <ScreenComponent onNavigate={setCurrent} />
+      </Phone>
     </div>
   );
 }
