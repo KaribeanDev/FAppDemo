@@ -24,11 +24,11 @@
 }
 
 .iphone-screen {
-  width: 100%;
+width: 100%;
   height: 100%;
   border-radius: 32px;
   overflow: hidden;
-}
+  background: linear-gradient(rgba(255,255,255,0.02), rgba(0,0,0,0.02));}
 
 .iphone-button {
   position: absolute;

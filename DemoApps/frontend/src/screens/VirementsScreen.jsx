@@ -1,5 +1,5 @@
 import React from "react";
-import virementsImg from "/images/virements.jpg";
+import virementsImg from "../images/virements.jpg";
 
 export default function VirementsScreen({ onNavigate }) {
   return (

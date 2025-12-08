@@ -1,5 +1,5 @@
 import React from "react";
-import beneficiairesImg from "/images/beneficiaires.jpg";
+import beneficiairesImg from "../images/beneficiaires.jpg";
 
 export default function BeneficiairesScreen({ onNavigate }) {
   return (

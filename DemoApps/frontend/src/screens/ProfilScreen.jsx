@@ -1,5 +1,5 @@
 import React from "react";
-import profilImg from "/images/Profil.jpg"; // mets ici ta capture d’écran de cette page
+import profilImg from "../images/Profil.jpg"; // mets ici ta capture d’écran de cette page
 
 export default function ProfileScreen({ onNavigate }) {
   return (

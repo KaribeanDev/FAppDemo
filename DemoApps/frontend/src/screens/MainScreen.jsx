@@ -1,5 +1,5 @@
 import React from "react";
-import homeImg from "/images/MainScreen.jpg"; // ta capture d’écran principale
+import homeImg from "../images/MainScreen.jpg"; // ta capture d’écran principale
 
 export default function MainScreen({ onNavigate }) {
   return (

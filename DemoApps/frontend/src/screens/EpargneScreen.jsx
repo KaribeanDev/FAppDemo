@@ -1,5 +1,5 @@
 import React from "react";
-import epargneImg from "/images/EpargneScreen.jpeg"; // ton image à placer dans /public/images/
+import epargneImg from "../images/EpargneScreen.jpeg"; // ton image à placer dans /public/images/
 
 export default function EpargneScreen({ onNavigate }) {
   return (
