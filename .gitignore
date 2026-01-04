@@ -1,0 +1,23 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Env files
+*.env
+*.env.*
+!.env.example
+
+# Uploads
+DemoApps/DemoApps/backend/uploads/
+
+# Database dumps
+*.sql
+
+# Build
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db

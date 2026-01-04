@@ -132,17 +132,16 @@ export default function GridEditor({
         userSelect: "none",
       }}
     >
-      {/* Image */}
+      {/* Image adaptée à Phone.css */}
       <img
         src={imageUrl}
         alt="preview"
         style={{
-          position: "absolute",
-          inset: 0,
           width: "100%",
           height: "100%",
           objectFit: "cover",
           display: "block",
+          borderRadius: "32px", // ✅ pour suivre le style de l'écran iPhone
           zIndex: 0,
           pointerEvents: "none",
         }}

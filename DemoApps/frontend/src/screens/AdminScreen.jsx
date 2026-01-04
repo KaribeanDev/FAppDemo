@@ -4,10 +4,18 @@ import {
   getImageWithZones,
   saveImageWithHotspots,
   deleteImage,
+  listCategories,
+  createCategory,
+  deleteCategory,
+  setPrimaryImage,
 } from "../services/imageService.js";
+
 import Phone from "../components/Phone.jsx";
 import GridEditor from "../components/GridEditor.jsx";
 import HotspotEditor from "../components/HotspotEditor.jsx";
+
+import "../styles/styles.css";
+import "../styles/Phone.css";
 
 export default function AdminScreen() {
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -18,182 +26,290 @@ export default function AdminScreen() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [notification, setNotification] = useState(null);
   const [currentImageId, setCurrentImageId] = useState(null);
+  const [imageName, setImageName] = useState("");
 
-  const groupSize = 3;
+  const [categories, setCategories] = useState([]);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryDesc, setNewCategoryDesc] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
 
+  const groupSize = 4;
+
+  /* ============================
+     🔄 LOAD IMAGES + CATEGORIES
+  ============================= */
   useEffect(() => {
     async function load() {
-      const imgs = await listImages();
-      setAvailableImages(imgs);
-      setCarouselIndex(0);
+      try {
+        const imgs = await listImages();
+        const cats = await listCategories();
+        setAvailableImages(imgs);
+        setCategories(cats);
+        setCarouselIndex(0);
+      } catch (err) {
+        setNotification({ type: "error", text: "Impossible de charger les données." });
+      }
     }
     load();
   }, []);
 
-  // Sélection d'une image du carousel
+  /* ============================
+     📌 SELECT IMAGE
+  ============================= */
   async function handleSelectImage(img) {
-    try {
-      const fullImg = await getImageWithZones(img.id);
-      setPreviewUrl("http://localhost:4000" + fullImg.url);
+    const fullImg = await getImageWithZones(img.id);
 
-      // Harmoniser target_image_id → targetImageId pour le frontend
-      const mappedZones = (fullImg.zones || []).map((z) => ({
-        ...z,
-        targetImageId: z.target_image_id,
-      }));
+    setPreviewUrl(fullImg.url);
+    setHotspots((fullImg.zones || []).map(z => ({
+      ...z,
+      targetImageId: z.target_image_id
+    })));
 
-      setHotspots(mappedZones);
-      setSelectedFile(null);
-      setSelectedIndex(null);
-      setCurrentImageId(img.id);
-    } catch (err) {
-      console.error("Erreur chargement image:", err);
-      setNotification({ type: "error", text: "Impossible de charger l'image." });
-      scheduleClearNotification();
-    }
+    setSelectedFile(null);
+    setSelectedIndex(null);
+    setCurrentImageId(img.id);
+    setImageName(fullImg.name || "");
+
+    setSelectedCategoryId(fullImg.categories?.[0]?.id || "");
   }
 
-  // Sélection d'un fichier à uploader
+  /* ============================
+     📁 FILE SELECT
+  ============================= */
   function handleFileSelect(e) {
     const file = e.target.files[0];
     if (!file) return;
+
     setSelectedFile(file);
 
     const reader = new FileReader();
-    reader.onload = (ev) => setPreviewUrl(ev.target.result);
+    reader.onload = ev => setPreviewUrl(ev.target.result);
     reader.readAsDataURL(file);
 
     setHotspots([]);
     setSelectedIndex(null);
     setCurrentImageId(null);
+    setImageName(file.name.replace(/\.[^/.]+$/, ""));
+    setSelectedCategoryId("");
   }
-  // Sauvegarde (nouvelle image ou mise à jour des zones)
+
+  /* ============================
+     💾 SAVE IMAGE
+  ============================= */
   async function handleSave() {
-    try {
-      if (selectedFile) {
-        const result = await saveImageWithHotspots(selectedFile, hotspots);
-        setNotification({ type: "success", text: `Image sauvegardée (ID: ${result.id})` });
-        const imgs = await listImages();
-        setAvailableImages(imgs);
-      } else if (previewUrl && currentImageId) {
-        await saveImageWithHotspots(null, hotspots, currentImageId);
-        setNotification({ type: "success", text: `Zones mises à jour (ID: ${currentImageId})` });
-        const imgs = await listImages();
-        setAvailableImages(imgs);
-      }
-    } catch (err) {
-      console.error("Erreur sauvegarde:", err);
-      setNotification({ type: "error", text: "Échec de la sauvegarde." });
-    }
+    await saveImageWithHotspots(
+      selectedFile || null,
+      hotspots,
+      currentImageId || null,
+      imageName,
+      selectedCategoryId,
+      [selectedCategoryId]
+    );
+
+    setAvailableImages(await listImages());
+    setNotification({ type: "success", text: "Sauvegarde effectuée." });
     scheduleClearNotification();
   }
 
-  // Suppression d'une image
+  /* ============================
+     🗑 DELETE IMAGE
+  ============================= */
   async function handleDelete(imgId) {
-    try {
-      await deleteImage(imgId);
-      const imgs = await listImages();
-      setAvailableImages(imgs);
+    await deleteImage(imgId);
+    setAvailableImages(await listImages());
 
-      // Nettoyage si l'image supprimée était affichée
-      const wasCurrent =
-        previewUrl &&
-        imgs.every((img) => "http://localhost:4000" + img.url !== previewUrl);
-      if (wasCurrent) {
-        setPreviewUrl(null);
-        setHotspots([]);
-        setSelectedIndex(null);
-        setCurrentImageId(null);
-      }
-
-      setNotification({ type: "success", text: "Image supprimée." });
-    } catch (err) {
-      console.error("Erreur suppression:", err);
-      setNotification({ type: "error", text: "Échec de la suppression." });
+    if (currentImageId === imgId) {
+      setPreviewUrl(null);
+      setHotspots([]);
+      setSelectedIndex(null);
+      setCurrentImageId(null);
+      setImageName("");
+      setSelectedCategoryId("");
     }
+
+    setNotification({ type: "success", text: "Image supprimée." });
     scheduleClearNotification();
   }
 
+  /* ============================
+     ➕ CREATE CATEGORY
+  ============================= */
+  async function handleCreateCategory() {
+    if (!newCategoryName.trim()) {
+      setNotification({ type: "error", text: "Nom requis." });
+      return scheduleClearNotification();
+    }
+
+    try {
+      await createCategory(newCategoryName, newCategoryDesc);
+      setCategories(await listCategories());
+      setNewCategoryName("");
+      setNewCategoryDesc("");
+      setNotification({ type: "success", text: "Catégorie créée." });
+    } catch (err) {
+      setNotification({ type: "error", text: err.message });
+    }
+
+    scheduleClearNotification();
+  }
+
+  /* ============================
+     🗑 DELETE CATEGORY
+  ============================= */
+  async function handleDeleteCategory(catId) {
+    if (confirm("Supprimer cette catégorie ?")) {
+      await deleteCategory(catId);
+      setCategories(await listCategories());
+      setNotification({ type: "success", text: "Catégorie supprimée." });
+      scheduleClearNotification();
+    }
+  }
+
+  /* ============================
+     ⭐ SET PRIMARY IMAGE
+  ============================= */
+  async function handleSetPrimary(catId, imgId) {
+    await setPrimaryImage(catId, imgId);
+    setCategories(await listCategories());
+    setNotification({ type: "success", text: "Image primaire définie." });
+    scheduleClearNotification();
+  }
+
+  /* ============================
+     🔔 NOTIFICATION TIMER
+  ============================= */
   function scheduleClearNotification() {
     setTimeout(() => setNotification(null), 3000);
   }
 
+  /* ============================
+     🎠 CAROUSEL
+  ============================= */
   const maxIndex = Math.max(0, availableImages.length - groupSize);
-  function slideLeft() {
-    setCarouselIndex((prev) => Math.max(0, prev - groupSize));
-  }
-  function slideRight() {
-    setCarouselIndex((prev) => Math.min(maxIndex, prev + groupSize));
-  }
+  const slideLeft = () => setCarouselIndex(prev => Math.max(0, prev - groupSize));
+  const slideRight = () => setCarouselIndex(prev => Math.min(maxIndex, prev + groupSize));
+
+  const categoryLabel = selectedCategoryId
+    ? categories.find(c => c.id === Number(selectedCategoryId))?.name
+    : "Aucune catégorie";
+
+  /* ============================
+     🎨 RENDER
+  ============================= */
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Admin — Gestion des images et zones</h2>
+    <div className="dashboard-container">
+      <header className="dashboard-header">
+        <h1>
+          {imageName
+            ? `${imageName} — Catégorie : ${categoryLabel}`
+            : "📱 Admin Panel"}
+        </h1>
 
-      {/* Notification */}
-      {notification && (
-        <div
-          style={{
-            marginBottom: 10,
-            padding: "10px 15px",
-            borderRadius: 6,
-            color: notification.type === "success" ? "#155724" : "#721c24",
-            background: notification.type === "success" ? "#d4edda" : "#f8d7da",
-            border: `1px solid ${
-              notification.type === "success" ? "#c3e6cb" : "#f5c6cb"
-            }`,
-          }}
-        >
-          {notification.text}
-        </div>
-      )}
-
-      {/* Upload */}
-      <input type="file" accept="image/*" onChange={handleFileSelect} />
-
-      <div style={{ display: "flex", gap: 120, marginTop: 20, alignItems: "flex-start" }}>
-        {/* Colonne gauche : carousel */}
-        {availableImages.length > 0 && (
-          <div style={{ width: 500, textAlign: "center", paddingRight: 40 }}>
-            <h3>Images enregistrées</h3>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center" }}>
-              <button onClick={slideLeft} disabled={carouselIndex === 0}>◀</button>
-
-              <div style={{ display: "flex", gap: 20, width: groupSize * 120 + (groupSize - 1) * 20, overflow: "hidden", padding: "10px" }}>
-                {availableImages.slice(carouselIndex, carouselIndex + groupSize).map((img) => (
-                  <div key={img.id} style={{ position: "relative", border: "2px solid #ccc", padding: 6, width: 120, flexShrink: 0, boxSizing: "border-box" }}>
-                    {/* Croix pour supprimer */}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleDelete(img.id); }}
-                      title="Supprimer l'image"
-                      style={{ position: "absolute", top: 2, right: 2, background: "transparent", border: "none", color: "#ff4444", fontSize: 16, cursor: "pointer", lineHeight: 1 }}
-                    >
-                      ✖
-                    </button>
-
-                    {/* Image cliquable */}
-                    <div onClick={() => handleSelectImage(img)} style={{ cursor: "pointer" }}>
-                      <img src={"http://localhost:4000" + img.url} alt={img.name} style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }} />
-                      <div style={{ textAlign: "center", fontSize: 12, marginTop: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {img.name}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button onClick={slideRight} disabled={carouselIndex >= maxIndex}>▶</button>
-            </div>
-
-            <div style={{ marginTop: 8, fontSize: 12, color: "#666" }}>
-              {Math.floor(carouselIndex / groupSize) + 1} / {Math.max(1, Math.ceil(availableImages.length / groupSize))}
-            </div>
+        {notification && (
+          <div className={`notification ${notification.type}`}>
+            {notification.text}
           </div>
         )}
+      </header>
 
-        {/* Colonne centre : iPhone + zones définies */}
-        <div style={{ position: "relative" }}>
-          {previewUrl && (
-            <div style={{ position: "absolute", top: 0, right: -260, width: 240 }}>
+      <main className="dashboard-main">
+
+        {/* ============================
+            🟦 BLOC 1 : INFOS IMAGE
+        ============================= */}
+        <div className="upload-section">
+
+          <input type="file" accept="image/*" onChange={handleFileSelect} />
+
+          <input
+            type="text"
+            placeholder="Nom de l'image"
+            value={imageName}
+            onChange={(e) => setImageName(e.target.value)}
+          />
+
+          <select
+            value={selectedCategoryId || ""}
+            onChange={(e) => setSelectedCategoryId(e.target.value)}
+          >
+            <option value="">-- Choisir une catégorie --</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+
+          {currentImageId && selectedCategoryId && (
+            <button
+              className="primary-btn"
+              onClick={() => handleSetPrimary(selectedCategoryId, currentImageId)}
+            >
+              ⭐ Définir primaire
+            </button>
+          )}
+        </div>
+
+        {/* ============================
+            🎠 CAROUSEL
+        ============================= */}
+        <div className="carousel-section">
+          <button onClick={slideLeft} disabled={carouselIndex === 0}>◀</button>
+
+          {availableImages.slice(carouselIndex, carouselIndex + groupSize).map(img => {
+            const isPrimary = categories.some(cat => cat.primary_image_id === img.id);
+
+            return (
+              <div key={img.id} className="carousel-item">
+
+                {isPrimary && <div className="primary-icon">⭐</div>}
+
+                <button
+                  className="delete-btn"
+                  onClick={(e) => { e.stopPropagation(); handleDelete(img.id); }}
+                >
+                  ✖
+                </button>
+
+                <div onClick={() => handleSelectImage(img)} className="carousel-click">
+                  <img src={img.url} alt={img.name} />
+                  <div className="carousel-name">{img.name}</div>
+                </div>
+              </div>
+            );
+          })}
+
+          <button onClick={slideRight} disabled={carouselIndex >= maxIndex}>▶</button>
+        </div>
+
+        {/* ============================
+            🟩 BLOC 2 : HOTSPOTS
+        ============================= */}
+        <div className="dashboard-grid">
+          <div className="dashboard-preview">
+            <Phone>
+              {previewUrl ? (
+                <GridEditor
+                  imageUrl={previewUrl}
+                  hotspots={hotspots}
+                  setHotspots={setHotspots}
+                  selectedIndex={selectedIndex}
+                  setSelectedIndex={setSelectedIndex}
+                />
+              ) : (
+                <div className="empty-screen">Aucune image chargée</div>
+              )}
+            </Phone>
+
+            {previewUrl && (
+              <button onClick={handleSave} className="save-btn">
+                💾 Sauvegarder
+              </button>
+            )}
+          </div>
+
+          <div className="dashboard-config">
+            {previewUrl && (
               <HotspotEditor
                 hotspots={hotspots}
                 setHotspots={setHotspots}
@@ -203,44 +319,64 @@ export default function AdminScreen() {
                 onSave={handleSave}
                 currentImageId={currentImageId}
               />
-            </div>
-          )}
-
-          <Phone>
-            {previewUrl ? (
-              <GridEditor
-                imageUrl={previewUrl}
-                hotspots={hotspots}
-                setHotspots={setHotspots}
-                selectedIndex={selectedIndex}
-                setSelectedIndex={setSelectedIndex}
-              />
-            ) : (
-              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#333", color: "#fff", fontSize: 18 }}>
-                Aucune image chargée
-              </div>
             )}
-          </Phone>
+          </div>
         </div>
-      </div>
 
-      {/* Bouton de sauvegarde global */}
-      {previewUrl && (
-        <button
-          onClick={handleSave}
-          style={{
-            marginTop: 20,
-            background: "#0077ff",
-            color: "#fff",
-            border: "none",
-            borderRadius: 6,
-            padding: "10px 16px",
-            cursor: "pointer",
-          }}
-        >
-          💾 Sauvegarder l’image et les zones
-        </button>
-      )}
+        {/* ============================
+            🟧 BLOC 3 : GESTION CATÉGORIES
+        ============================= */}
+        <div className="category-section">
+          <h3>Gestion des catégories</h3>
+
+          <div className="category-form">
+            <input
+              type="text"
+              placeholder="Nom"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Description"
+              value={newCategoryDesc}
+              onChange={(e) => setNewCategoryDesc(e.target.value)}
+            />
+            <button onClick={handleCreateCategory}>➕ Créer</button>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {categories.map(cat => (
+                <tr key={cat.id}>
+                  <td>{cat.name}</td>
+                  <td>{cat.description}</td>
+                  <td>
+                    <div className="category-actions">
+                      <button
+                        onClick={() => handleDeleteCategory(cat.id)}
+                        className="delete-cat-btn"
+                      >
+                        🗑️ Supprimer
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+
+          </table>
+        </div>
+
+      </main>
     </div>
   );
 }

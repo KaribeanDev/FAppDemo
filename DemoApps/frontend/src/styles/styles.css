@@ -1,33 +1,303 @@
+/* ============================
+   🌐 RESET & BASE
+============================ */
 body {
-  font-family: sans-serif;
-  background: #f2f4f8;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  font-family: system-ui, sans-serif;
+  background: #f3f4f6;
   margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: #111827;
 }
 
-.app-container {
+/* ============================
+   🟦 HEADER
+============================ */
+.dashboard-header {
+  background: #1f2937;
+  color: #fff;
+  padding: 20px 24px;
   text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+.notification {
+  margin-top: 10px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  display: inline-block;
+  font-size: 14px;
+}
+.notification.success {
+  background: #10b981;
+  color: #fff;
+}
+.notification.error {
+  background: #ef4444;
+  color: #fff;
 }
 
-.screen {
+/* ============================
+   🟦 BLOC 1 : INFOS IMAGE
+============================ */
+.upload-section {
+  margin: 24px auto;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  background: #ffffff;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.upload-section input[type="file"],
+.upload-section input[type="text"],
+.upload-section select {
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #f9fafb;
+}
+
+/* Bouton primaire */
+.primary-btn {
+  background: #f59e0b;
+  color: #111;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.primary-btn:hover {
+  background: #d97706;
+}
+
+/* ============================
+   🎠 CAROUSEL
+============================ */
+.carousel-section {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  margin: 24px 0;
+}
+
+.carousel-item {
   position: relative;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 8px;
+  width: 130px;
+  background: #ffffff;
+  transition: transform 0.15s ease;
+}
+.carousel-item:hover {
+  transform: scale(1.03);
+}
+
+.carousel-item img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.carousel-name {
+  text-align: center;
+  font-size: 13px;
+  margin-top: 6px;
+  color: #374151;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* ⭐ Icône image primaire */
+.primary-icon {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: #f59e0b;
+  color: #fff;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* ============================
+   🟩 BLOC 2 : HOTSPOTS
+============================ */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  align-items: flex-start;
+  margin: 24px;
+}
+
+.dashboard-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.save-btn {
+  margin-top: 20px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.save-btn:hover {
+  background: #2563eb;
+}
+
+.dashboard-config {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* ============================
+   🟧 BLOC 3 : CATÉGORIES
+============================ */
+.category-section {
+  margin: 40px 24px;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.category-section h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.category-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.category-form input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.category-form button {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.category-form button:hover {
+  background: #2563eb;
+}
+
+.category-section table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.category-section th,
+.category-section td {
+  border: 1px solid #e5e7eb;
+  padding: 10px;
+  text-align: left;
+  font-size: 14px;
+}
+
+.category-section th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.category-section tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.category-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.delete-cat-btn {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.delete-cat-btn:hover {
+  background: #dc2626;
+}
+
+/* ============================
+   📱 EMPTY SCREEN
+============================ */
+.empty-screen {
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-position: top center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #374151;
+  color: #fff;
+  border-radius: 12px;
 }
 
+/* ============================
+   🔴 HOTSPOTS
+============================ */
 .hotspot {
   position: absolute;
+  border: 2px solid #fff;
+  background: rgba(239, 68, 68, 0.8);
+  border-radius: 50%;
   cursor: pointer;
- /* background-color: rgba(0, 123, 255, 0);  invisible */
-  transition: background-color 0.2s;
+  transition: transform 0.2s, background 0.2s;
 }
-
-/*.hotspot:hover {
-  background-color: rgba(0, 123, 255, 0.2);  visible au survol pour dev  
-}*/
-
+.hotspot:hover {
+  transform: scale(1.2);
+  background: rgba(239, 68, 68, 1);
+}
